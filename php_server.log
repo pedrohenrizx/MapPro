@@ -1,40 +1,40 @@
-[Mon Apr 27 10:42:51 2026] PHP 8.3.6 Development Server (http://localhost:8000) started
-[Mon Apr 27 10:43:25 2026] [::1]:56320 Accepted
-[Mon Apr 27 10:43:25 2026] [::1]:56320 Closing
-[Mon Apr 27 10:43:25 2026] [::1]:56332 Accepted
-[Mon Apr 27 10:43:25 2026] [::1]:56346 Accepted
-[Mon Apr 27 10:43:25 2026] [::1]:56356 Accepted
-[Mon Apr 27 10:43:25 2026] [::1]:56332 [200]: GET /js/init.js
-[Mon Apr 27 10:43:25 2026] [::1]:56332 Closing
-[Mon Apr 27 10:43:25 2026] [::1]:56346 [200]: GET /js/theme.js
-[Mon Apr 27 10:43:25 2026] [::1]:56356 [200]: GET /js/auth.js
-[Mon Apr 27 10:43:25 2026] [::1]:56346 Closing
-[Mon Apr 27 10:43:25 2026] [::1]:56356 Closing
-[Mon Apr 27 10:43:28 2026] [::1]:56360 Accepted
-[Mon Apr 27 10:43:28 2026] [::1]:56360 Closing
-[Mon Apr 27 10:43:28 2026] [::1]:56364 Accepted
-[Mon Apr 27 10:43:28 2026] [::1]:56380 Accepted
-[Mon Apr 27 10:43:28 2026] [::1]:56384 Accepted
-[Mon Apr 27 10:43:28 2026] [::1]:56390 Accepted
-[Mon Apr 27 10:43:28 2026] [::1]:56364 [200]: GET /js/dashboard.js
-[Mon Apr 27 10:43:28 2026] [::1]:56380 [200]: GET /js/init.js
-[Mon Apr 27 10:43:28 2026] [::1]:56384 [200]: GET /js/theme.js
-[Mon Apr 27 10:43:28 2026] [::1]:56390 [200]: GET /js/auth.js
-[Mon Apr 27 10:43:28 2026] [::1]:56364 Closing
-[Mon Apr 27 10:43:28 2026] [::1]:56380 Closing
-[Mon Apr 27 10:43:28 2026] [::1]:56384 Closing
-[Mon Apr 27 10:43:28 2026] [::1]:56390 Closing
-[Mon Apr 27 10:43:29 2026] [::1]:56404 Accepted
-[Mon Apr 27 10:43:29 2026] [::1]:56404 Closing
-[Mon Apr 27 10:43:29 2026] [::1]:56412 Accepted
-[Mon Apr 27 10:43:29 2026] [::1]:56424 Accepted
-[Mon Apr 27 10:43:29 2026] [::1]:56426 Accepted
-[Mon Apr 27 10:43:29 2026] [::1]:56432 Accepted
-[Mon Apr 27 10:43:29 2026] [::1]:56412 [200]: GET /js/editor.js
-[Mon Apr 27 10:43:29 2026] [::1]:56424 [200]: GET /js/init.js
-[Mon Apr 27 10:43:29 2026] [::1]:56426 [200]: GET /js/theme.js
-[Mon Apr 27 10:43:29 2026] [::1]:56432 [200]: GET /js/auth.js
-[Mon Apr 27 10:43:29 2026] [::1]:56412 Closing
-[Mon Apr 27 10:43:29 2026] [::1]:56424 Closing
-[Mon Apr 27 10:43:29 2026] [::1]:56426 Closing
-[Mon Apr 27 10:43:29 2026] [::1]:56432 Closing
+[Mon Apr 27 11:38:29 2026] PHP 8.3.6 Development Server (http://localhost:8000) started
+[Mon Apr 27 11:46:09 2026] [::1]:44132 Accepted
+[Mon Apr 27 11:46:09 2026] [::1]:44132 Closing
+[Mon Apr 27 11:46:09 2026] [::1]:44136 Accepted
+[Mon Apr 27 11:46:09 2026] [::1]:44152 Accepted
+[Mon Apr 27 11:46:09 2026] [::1]:44166 Accepted
+[Mon Apr 27 11:46:09 2026] [::1]:44136 [200]: GET /js/init.js
+[Mon Apr 27 11:46:09 2026] [::1]:44152 [200]: GET /js/theme.js
+[Mon Apr 27 11:46:09 2026] [::1]:44166 [200]: GET /js/auth.js
+[Mon Apr 27 11:46:09 2026] [::1]:44136 Closing
+[Mon Apr 27 11:46:09 2026] [::1]:44152 Closing
+[Mon Apr 27 11:46:09 2026] [::1]:44166 Closing
+[Mon Apr 27 11:46:11 2026] [::1]:44170 Accepted
+[Mon Apr 27 11:46:11 2026] [::1]:44170 Closing
+[Mon Apr 27 11:46:11 2026] [::1]:44172 Accepted
+[Mon Apr 27 11:46:11 2026] [::1]:44188 Accepted
+[Mon Apr 27 11:46:11 2026] [::1]:44196 Accepted
+[Mon Apr 27 11:46:11 2026] [::1]:44206 Accepted
+[Mon Apr 27 11:46:11 2026] [::1]:44172 [200]: GET /js/init.js
+[Mon Apr 27 11:46:11 2026] [::1]:44188 [200]: GET /js/dashboard.js
+[Mon Apr 27 11:46:11 2026] [::1]:44196 [200]: GET /js/theme.js
+[Mon Apr 27 11:46:11 2026] [::1]:44206 [200]: GET /js/auth.js
+[Mon Apr 27 11:46:11 2026] [::1]:44172 Closing
+[Mon Apr 27 11:46:11 2026] [::1]:44188 Closing
+[Mon Apr 27 11:46:11 2026] [::1]:44196 Closing
+[Mon Apr 27 11:46:11 2026] [::1]:44206 Closing
+[Mon Apr 27 11:46:15 2026] [::1]:44210 Accepted
+[Mon Apr 27 11:46:15 2026] [::1]:44210 Closing
+[Mon Apr 27 11:46:15 2026] [::1]:44224 Accepted
+[Mon Apr 27 11:46:15 2026] [::1]:44234 Accepted
+[Mon Apr 27 11:46:15 2026] [::1]:44240 Accepted
+[Mon Apr 27 11:46:15 2026] [::1]:44250 Accepted
+[Mon Apr 27 11:46:15 2026] [::1]:44224 [200]: GET /js/editor.js
+[Mon Apr 27 11:46:15 2026] [::1]:44234 [200]: GET /js/init.js
+[Mon Apr 27 11:46:15 2026] [::1]:44240 [200]: GET /js/theme.js
+[Mon Apr 27 11:46:15 2026] [::1]:44250 [200]: GET /js/auth.js
+[Mon Apr 27 11:46:15 2026] [::1]:44224 Closing
+[Mon Apr 27 11:46:15 2026] [::1]:44234 Closing
+[Mon Apr 27 11:46:15 2026] [::1]:44240 Closing
+[Mon Apr 27 11:46:15 2026] [::1]:44250 Closing
