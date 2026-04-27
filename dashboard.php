@@ -55,9 +55,9 @@
     </main>
 
     <!-- Scripts -->
-    <script src="js/init.js"></script>
-    <script src="js/theme.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/dashboard.js"></script>
+    <script src="/js/init.js"></script>
+    <script src="/js/theme.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/dashboard.js"></script>
 </body>
 </html>

@@ -46,7 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
         card.className = "bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow cursor-pointer border border-gray-200 dark:border-gray-700 relative group";
 
         card.innerHTML = `
-            <div class="flex flex-col h-full" onclick="window.location.href='app.php?id=${map.id}'">
+            <div class="flex flex-col h-full" onclick="window.location.href='/map/${map.id}'">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2 truncate">${title}</h3>
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-auto">Last updated: ${date}</p>
             </div>
@@ -99,7 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             try {
                 await map.save();
-                window.location.href = `app.php?id=${map.id}`;
+                window.location.href = `/map/${map.id}`;
             } catch (error) {
                 console.error('Failed to create new map:', error);
                 alert('Failed to create new map. Please try again.');

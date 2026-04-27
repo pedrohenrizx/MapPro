@@ -49,7 +49,7 @@
                 </div>
 
                 <div class="text-sm text-center">
-                    <a href="register.php" class="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
+                    <a href="/register" class="font-medium text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300">
                         Don't have an account? Register here.
                     </a>
                 </div>
@@ -58,8 +58,8 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/init.js"></script>
-    <script src="js/theme.js"></script>
-    <script src="js/auth.js"></script>
+    <script src="/js/init.js"></script>
+    <script src="/js/theme.js"></script>
+    <script src="/js/auth.js"></script>
 </body>
 </html>

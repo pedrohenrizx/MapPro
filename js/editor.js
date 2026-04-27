@@ -2,11 +2,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     const currentUser = Parse.User.current();
     if (!currentUser) return; // auth.js will handle redirect
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const mapId = urlParams.get('id');
+    let mapId = null;
+    const pathParts = window.location.pathname.split('/');
+    if (pathParts.length >= 3 && pathParts[1] === 'map') {
+        mapId = pathParts[2];
+    } else {
+        const urlParams = new URLSearchParams(window.location.search);
+        mapId = urlParams.get('id');
+    }
 
     if (!mapId) {
-        window.location.href = 'dashboard.php';
+        window.location.href = '/dashboard';
         return;
     }
 
@@ -243,7 +249,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         } catch (error) {
             console.error("Error loading map:", error);
             alert("Error loading map. It might not exist or you don't have permission.");
-            window.location.href = 'dashboard.php';
+            window.location.href = '/dashboard';
         }
     }
 
@@ -293,7 +299,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     backBtn.addEventListener('click', () => {
         saveMap().then(() => {
-            window.location.href = 'dashboard.php';
+            window.location.href = '/dashboard';
         });
     });
 

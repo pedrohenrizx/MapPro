@@ -4,12 +4,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Redirect logic
     if (currentUser) {
-        if (currentPath.endsWith('login.php') || currentPath.endsWith('register.php') || currentPath === '/' || currentPath === '/index.php') {
-            window.location.href = 'dashboard.php';
+        if (currentPath.endsWith('login.php') || currentPath.endsWith('register.php') || currentPath === '/' || currentPath === '/index.php' || currentPath.endsWith('login') || currentPath.endsWith('register')) {
+            window.location.href = '/dashboard';
         }
     } else {
-        if (!currentPath.endsWith('login.php') && !currentPath.endsWith('register.php')) {
-            window.location.href = 'login.php';
+        if (!currentPath.endsWith('login.php') && !currentPath.endsWith('register.php') && !currentPath.endsWith('login') && !currentPath.endsWith('register')) {
+            window.location.href = '/login';
         }
     }
 
@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             try {
                 const user = await Parse.User.logIn(username, password);
-                window.location.href = 'dashboard.php';
+                window.location.href = '/dashboard';
             } catch (error) {
                 errorDiv.textContent = error.message;
                 errorDiv.classList.remove('hidden');
@@ -54,7 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 successDiv.classList.remove('hidden');
                 errorDiv.classList.add('hidden');
                 setTimeout(() => {
-                    window.location.href = 'dashboard.php';
+                    window.location.href = '/dashboard';
                 }, 1500);
             } catch (error) {
                 errorDiv.textContent = error.message;
@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
             e.preventDefault();
             try {
                 await Parse.User.logOut();
-                window.location.href = 'login.php';
+                window.location.href = '/login';
             } catch (error) {
                 console.error('Error logging out:', error);
             }
