@@ -1,0 +1,53 @@
+[Sat May  2 02:30:22 2026] PHP 8.3.6 Development Server (http://localhost:8000) started
+[Sat May  2 02:31:20 2026] [::1]:40046 Accepted
+[Sat May  2 02:31:20 2026] [::1]:40046 Closing
+[Sat May  2 02:31:20 2026] [::1]:40054 Accepted
+[Sat May  2 02:31:20 2026] [::1]:40068 Accepted
+[Sat May  2 02:31:20 2026] [::1]:40082 Accepted
+[Sat May  2 02:31:20 2026] [::1]:40054 [200]: GET /js/init.js
+[Sat May  2 02:31:20 2026] [::1]:40054 Closing
+[Sat May  2 02:31:20 2026] [::1]:40068 [200]: GET /js/theme.js
+[Sat May  2 02:31:20 2026] [::1]:40068 Closing
+[Sat May  2 02:31:20 2026] [::1]:40082 [200]: GET /js/auth.js
+[Sat May  2 02:31:20 2026] [::1]:40082 Closing
+[Sat May  2 02:31:22 2026] [::1]:40096 Accepted
+[Sat May  2 02:31:22 2026] [::1]:40096 Closing
+[Sat May  2 02:31:22 2026] [::1]:40100 Accepted
+[Sat May  2 02:31:22 2026] [::1]:40112 Accepted
+[Sat May  2 02:31:22 2026] [::1]:40120 Accepted
+[Sat May  2 02:31:22 2026] [::1]:40134 Accepted
+[Sat May  2 02:31:22 2026] [::1]:40100 [200]: GET /js/dashboard.js
+[Sat May  2 02:31:22 2026] [::1]:40100 Closing
+[Sat May  2 02:31:22 2026] [::1]:40112 [200]: GET /js/init.js
+[Sat May  2 02:31:22 2026] [::1]:40120 [200]: GET /js/theme.js
+[Sat May  2 02:31:22 2026] [::1]:40112 Closing
+[Sat May  2 02:31:22 2026] [::1]:40120 Closing
+[Sat May  2 02:31:22 2026] [::1]:40134 [200]: GET /js/auth.js
+[Sat May  2 02:31:22 2026] [::1]:40134 Closing
+[Sat May  2 02:33:37 2026] [::1]:52832 Accepted
+[Sat May  2 02:33:37 2026] [::1]:52832 Closing
+[Sat May  2 02:33:37 2026] [::1]:52836 Accepted
+[Sat May  2 02:33:37 2026] [::1]:52838 Accepted
+[Sat May  2 02:33:37 2026] [::1]:52854 Accepted
+[Sat May  2 02:33:37 2026] [::1]:52836 [200]: GET /js/init.js
+[Sat May  2 02:33:37 2026] [::1]:52836 Closing
+[Sat May  2 02:33:37 2026] [::1]:52838 [200]: GET /js/theme.js
+[Sat May  2 02:33:37 2026] [::1]:52854 [200]: GET /js/auth.js
+[Sat May  2 02:33:37 2026] [::1]:52838 Closing
+[Sat May  2 02:33:37 2026] [::1]:52854 Closing
+[Sat May  2 02:33:39 2026] [::1]:52870 Accepted
+[Sat May  2 02:33:39 2026] [::1]:52870 Closing
+[Sat May  2 02:33:39 2026] [::1]:52886 Accepted
+[Sat May  2 02:33:39 2026] [::1]:52892 Accepted
+[Sat May  2 02:33:39 2026] [::1]:52906 Accepted
+[Sat May  2 02:33:39 2026] [::1]:52912 Accepted
+[Sat May  2 02:33:39 2026] [::1]:52886 [200]: GET /js/dashboard.js
+[Sat May  2 02:33:39 2026] [::1]:52892 [200]: GET /js/init.js
+[Sat May  2 02:33:39 2026] [::1]:52906 [200]: GET /js/theme.js
+[Sat May  2 02:33:39 2026] [::1]:52912 [200]: GET /js/auth.js
+[Sat May  2 02:33:39 2026] [::1]:52886 Closing
+[Sat May  2 02:33:39 2026] [::1]:52892 Closing
+[Sat May  2 02:33:39 2026] [::1]:52906 Closing
+[Sat May  2 02:33:39 2026] [::1]:52912 Closing
+[Sat May  2 02:34:44 2026] [::1]:59886 Accepted
+[Sat May  2 02:34:44 2026] [::1]:59886 Closing
