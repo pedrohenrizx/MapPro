@@ -43,6 +43,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     let historyIndex = -1;
     let isUndoRedo = false;
 
+    let selectedNodeId = null;
+
     function showToast(msg, type = 'success') {
         if(typeof Toastify === 'undefined') return;
         Toastify({ text: msg, duration: 3000, close: true, gravity: "top", position: "right", style: { background: type === 'error' ? "#ef4444" : "#10b981" } }).showToast();
@@ -96,6 +98,108 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         draggedNode = null;
     });
+
+    workspace.addEventListener('click', (e) => {
+        if(e.target === workspace || e.target === canvas || e.target === linesLayer) {
+            selectNode(null);
+        }
+    });
+
+    function syncPropertiesPanel() {
+        const panel = document.getElementById('properties-panel');
+        if (!selectedNodeId || isReadOnly) {
+            panel.classList.add('translate-x-full');
+            return;
+        }
+        panel.classList.remove('translate-x-full');
+
+        const node = nodes.find(n => n.id === selectedNodeId);
+        if(!node) return;
+
+        // Shape
+        document.querySelectorAll('.prop-btn[data-prop="shape"]').forEach(b => {
+            if((node.shape || 'rect') === b.dataset.val) b.classList.add('bg-gray-200', 'dark:bg-gray-600');
+            else b.classList.remove('bg-gray-200', 'dark:bg-gray-600');
+        });
+
+        // Text style
+        document.querySelector('.prop-btn[data-prop="bold"]').classList.toggle('bg-gray-200', !!node.bold);
+        document.querySelector('.prop-btn[data-prop="bold"]').classList.toggle('dark:bg-gray-600', !!node.bold);
+        document.querySelector('.prop-btn[data-prop="italic"]').classList.toggle('bg-gray-200', !!node.italic);
+        document.querySelector('.prop-btn[data-prop="italic"]').classList.toggle('dark:bg-gray-600', !!node.italic);
+        document.querySelector('.prop-btn[data-prop="underline"]').classList.toggle('bg-gray-200', !!node.underline);
+        document.querySelector('.prop-btn[data-prop="underline"]').classList.toggle('dark:bg-gray-600', !!node.underline);
+
+        // Edge style (from this node to parent)
+        document.querySelectorAll('.prop-btn[data-prop="lineType"]').forEach(b => {
+            if((node.lineType || 'solid') === b.dataset.val) b.classList.add('bg-gray-200', 'dark:bg-gray-600');
+            else b.classList.remove('bg-gray-200', 'dark:bg-gray-600');
+        });
+        document.getElementById('line-weight').value = node.lineWeight || 2;
+
+        document.getElementById('node-link').value = node.link || '';
+        document.getElementById('node-notes').value = node.notes || '';
+    }
+
+    // Properties interactions
+    document.querySelectorAll('.prop-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if(!selectedNodeId) return;
+            const node = nodes.find(n => n.id === selectedNodeId);
+            if(!node) return;
+            const prop = btn.dataset.prop;
+            const val = btn.dataset.val;
+
+            if(prop === 'shape' || prop === 'lineType') {
+                node[prop] = val;
+            } else if(['bold', 'italic', 'underline'].includes(prop)) {
+                node[prop] = !node[prop];
+            }
+
+            triggerAutoSave();
+            syncPropertiesPanel();
+            renderMap(); // Re-render to apply styles
+        });
+    });
+
+    document.getElementById('line-weight').addEventListener('input', (e) => {
+        if(!selectedNodeId) return;
+        const node = nodes.find(n => n.id === selectedNodeId);
+        if(node) {
+            node.lineWeight = parseInt(e.target.value);
+            triggerAutoSave();
+            drawLines();
+        }
+    });
+
+    document.getElementById('node-link').addEventListener('change', (e) => {
+        if(!selectedNodeId) return;
+        const node = nodes.find(n => n.id === selectedNodeId);
+        if(node) { node.link = e.target.value; triggerAutoSave(); renderMap(); }
+    });
+
+    document.getElementById('node-notes').addEventListener('change', (e) => {
+        if(!selectedNodeId) return;
+        const node = nodes.find(n => n.id === selectedNodeId);
+        if(node) { node.notes = e.target.value; triggerAutoSave(); renderMap(); }
+    });
+
+    document.getElementById('close-properties').addEventListener('click', () => {
+        selectNode(null);
+    });
+
+    function selectNode(id) {
+        if (selectedNodeId) {
+            const el = document.getElementById(selectedNodeId);
+            if (el) el.classList.remove('selected');
+        }
+        selectedNodeId = id;
+        if (selectedNodeId) {
+            const el = document.getElementById(selectedNodeId);
+            if (el) el.classList.add('selected');
+        }
+        syncPropertiesPanel();
+    }
 
     function setZoom(newScale, center = false) {
         newScale = Math.max(0.1, Math.min(newScale, 5));
@@ -151,6 +255,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     function updateCanvasTransform() {
         canvas.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+        updateMinimap();
     }
 
     // --- Node Interaction ---
@@ -170,12 +275,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         if (nodeData.collapsed) nodeEl.classList.add('collapsed');
         if (nodeData.color) nodeEl.style.backgroundColor = nodeData.color;
+        if (nodeData.shape) nodeEl.classList.add(`shape-${nodeData.shape}`);
 
         const content = document.createElement('div');
         content.className = 'node-content';
         content.contentEditable = !isReadOnly;
         content.textContent = nodeData.text;
         if (nodeData.fontSize) content.style.fontSize = `${nodeData.fontSize}px`;
+        if (nodeData.bold) content.style.fontWeight = 'bold';
+        if (nodeData.italic) content.style.fontStyle = 'italic';
+        if (nodeData.underline) content.style.textDecoration = 'underline';
 
         // Prevent drag when editing text
         content.addEventListener('mousedown', (e) => e.stopPropagation());
@@ -259,6 +368,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         collapseInd.textContent = '...';
         nodeEl.appendChild(collapseInd);
 
+        // Icons
+        if(nodeData.link || nodeData.notes) {
+            const icons = document.createElement('div');
+            icons.className = 'node-icons';
+            if(nodeData.link) icons.innerHTML += `<a href="${nodeData.link}" target="_blank" onclick="event.stopPropagation()"><svg class="w-3 h-3 hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg></a>`;
+            if(nodeData.notes) icons.innerHTML += `<span title="${nodeData.notes.replace(/"/g, '&quot;')}"><svg class="w-3 h-3 hover:text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg></span>`;
+            nodeEl.appendChild(icons);
+        }
+
         nodesLayer.appendChild(nodeEl);
 
         // Collapse logic
@@ -280,6 +398,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         // Drag logic
         nodeEl.addEventListener('mousedown', (e) => {
+            selectNode(nodeData.id);
             if (e.target === nodeEl || e.target.classList.contains('collapse-indicator')) {
                 draggedNode = nodeEl;
                 dragStartX = e.clientX;
@@ -291,6 +410,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
 
         updateNodeElement(nodeEl, nodeData);
+        if(selectedNodeId === nodeData.id) selectNode(nodeData.id);
         return nodeEl;
     }
 
@@ -426,6 +546,15 @@ document.addEventListener("DOMContentLoaded", async () => {
                     if(sourceNode.color && sourceNode.color !== '#ffffff') {
                         path.style.stroke = sourceNode.color;
                     }
+                    if(targetNode.lineWeight) {
+                        path.style.strokeWidth = targetNode.lineWeight;
+                    }
+                    if(targetNode.lineType === 'dashed') {
+                        path.style.strokeDasharray = "5,5";
+                    } else if(targetNode.lineType === 'dotted') {
+                        path.style.strokeDasharray = "2,4";
+                        path.style.strokeLinecap = "round";
+                    }
 
                     // Add arrow marker
                     if(isDark) {
@@ -558,6 +687,34 @@ document.addEventListener("DOMContentLoaded", async () => {
         };
         currentMapObject.set("data", JSON.stringify(dataToSave));
 
+        // Generate thumbnail
+        try {
+            if(typeof html2canvas !== 'undefined' && nodes.length > 0) {
+                // simple bounds capture for thumbnail
+                let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+                nodes.forEach(n => {
+                    if(n.x < minX) minX = n.x; if(n.y < minY) minY = n.y;
+                    if(n.x > maxX) maxX = n.x; if(n.y > maxY) maxY = n.y;
+                });
+                const originalScale = scale; const originalX = panX; const originalY = panY;
+                panX = -minX + 50; panY = -minY + 50; scale = 1;
+                updateCanvasTransform();
+
+                const canvasEl = await html2canvas(document.getElementById('canvas'), {
+                    width: maxX - minX + 100, height: maxY - minY + 100,
+                    backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#f9fafb',
+                    scale: 0.5 // lower res for thumbnail
+                });
+
+                currentMapObject.set("thumbnail", canvasEl.toDataURL('image/jpeg', 0.5));
+
+                panX = originalX; panY = originalY; scale = originalScale;
+                updateCanvasTransform();
+            }
+        } catch(e) {
+            console.error("Thumbnail generation failed:", e);
+        }
+
         try {
             await currentMapObject.save();
             saveStatus.textContent = 'Saved!';
@@ -590,27 +747,147 @@ document.addEventListener("DOMContentLoaded", async () => {
         // Adjust pan if necessary, but usually leaving it as is works
     });
 
+    // --- Advanced Interactions ---
+    let clipboardNode = null;
+
     // --- Keyboard Shortcuts ---
     window.addEventListener('keydown', (e) => {
-        // Only if not typing in contenteditable or input
-        const isEditing = e.target.isContentEditable || e.target.tagName === 'INPUT';
+        const isEditing = e.target.isContentEditable || e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA';
 
-        if (e.key === 'Delete' && !isEditing && draggedNode) {
-            deleteNode(draggedNode.id);
+        if (e.key === 'Delete' && !isEditing && selectedNodeId) {
+            deleteNode(selectedNodeId);
         }
+
+        if (!isEditing && selectedNodeId && e.key.startsWith('Arrow')) {
+            e.preventDefault();
+            const node = nodes.find(n => n.id === selectedNodeId);
+            if(!node) return;
+
+            if(e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                // Find first child
+                const childEdge = edges.find(ed => ed.source === selectedNodeId);
+                if(childEdge) selectNode(childEdge.target);
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                // Find parent
+                const parentEdge = edges.find(ed => ed.target === selectedNodeId);
+                if(parentEdge) selectNode(parentEdge.source);
+            }
+        }
+
         if (e.ctrlKey || e.metaKey) {
             if (e.key === 'z') {
-                e.preventDefault();
-                undo();
+                if(!isEditing) { e.preventDefault(); undo(); }
             } else if (e.key === 'y') {
-                e.preventDefault();
-                redo();
+                if(!isEditing) { e.preventDefault(); redo(); }
             } else if (e.key === 's') {
                 e.preventDefault();
                 saveMap();
+            } else if (e.key === 'c' && !isEditing && selectedNodeId) {
+                const node = nodes.find(n => n.id === selectedNodeId);
+                if(node) clipboardNode = JSON.parse(JSON.stringify(node));
+            } else if (e.key === 'v' && !isEditing && selectedNodeId && clipboardNode) {
+                // Paste as child of selected
+                const newId = 'node_' + Date.now();
+                const pastedNode = { ...clipboardNode, id: newId };
+
+                const parentNode = nodes.find(n => n.id === selectedNodeId);
+                if(parentNode) {
+                    pastedNode.x = parentNode.x + 150;
+                    pastedNode.y = parentNode.y + 100;
+                    nodes.push(pastedNode);
+                    edges.push({ source: parentNode.id, target: newId });
+                    createNodeElement(pastedNode);
+                    drawLines();
+                    triggerAutoSave();
+                    selectNode(newId);
+                }
             }
         }
     });
+
+    // --- Auto Layout ---
+    const autoLayoutBtn = document.getElementById('auto-layout-btn');
+    if(autoLayoutBtn) {
+        autoLayoutBtn.addEventListener('click', () => {
+            if(isReadOnly) return;
+            // Simple horizontal tree layout starting from root
+            const rootNode = nodes.find(n => n.id === 'root') || nodes[0];
+            if(!rootNode) return;
+
+            let currentY = rootNode.y;
+            const X_SPACING = 200;
+            const Y_SPACING = 100;
+
+            function layoutChildren(parentId, depth) {
+                const children = edges.filter(e => e.source === parentId).map(e => nodes.find(n => n.id === e.target)).filter(Boolean);
+                if(children.length === 0) return 0;
+
+                let totalHeight = 0;
+                children.forEach((child, index) => {
+                    const childHeight = layoutChildren(child.id, depth + 1);
+                    const h = Math.max(childHeight, Y_SPACING);
+
+                    child.x = rootNode.x + (depth * X_SPACING);
+                    // Center vertically based on children height
+                    if(index === 0) currentY -= (children.length * Y_SPACING) / 2;
+
+                    child.y = currentY;
+                    currentY += h;
+                    totalHeight += h;
+                });
+                return totalHeight;
+            }
+
+            layoutChildren(rootNode.id, 1);
+
+            // Re-render
+            renderMap();
+            triggerAutoSave();
+            setZoom(1, true);
+        });
+    }
+
+    // --- Minimap ---
+    function updateMinimap() {
+        const minimap = document.getElementById('minimap');
+        const minimapContent = document.getElementById('minimap-content');
+        const minimapViewport = document.getElementById('minimap-viewport');
+        if(!minimap || !minimapContent || !minimapViewport || nodes.length === 0) return;
+
+        // Calc bounds
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        nodes.forEach(n => {
+            if(n.x < minX) minX = n.x; if(n.y < minY) minY = n.y;
+            if(n.x > maxX) maxX = n.x; if(n.y > maxY) maxY = n.y;
+        });
+        minX -= 200; minY -= 200; maxX += 200; maxY += 200;
+        const mapW = maxX - minX;
+        const mapH = maxY - minY;
+
+        // Draw nodes in minimap
+        minimapContent.innerHTML = '';
+        const minimapScale = Math.min(192 / mapW, 128 / mapH); // minimap dimensions approx 192x128
+
+        nodes.forEach(n => {
+            const dot = document.createElement('div');
+            dot.className = 'absolute bg-blue-400 rounded-sm';
+            dot.style.width = '6px'; dot.style.height = '4px';
+            dot.style.left = `${(n.x - minX) * minimapScale}px`;
+            dot.style.top = `${(n.y - minY) * minimapScale}px`;
+            minimapContent.appendChild(dot);
+        });
+
+        // Viewport rect
+        const viewW = (window.innerWidth / scale) * minimapScale;
+        const viewH = (window.innerHeight / scale) * minimapScale;
+        const viewX = ((-panX / scale) - minX) * minimapScale;
+        const viewY = ((-panY / scale) - minY) * minimapScale;
+
+        minimapViewport.style.width = `${viewW}px`;
+        minimapViewport.style.height = `${viewH}px`;
+        minimapViewport.style.left = `${viewX}px`;
+        minimapViewport.style.top = `${viewY}px`;
+    }
 
     // --- Export / Import ---
     document.getElementById('export-png-btn').addEventListener('click', () => {
@@ -668,6 +945,83 @@ document.addEventListener("DOMContentLoaded", async () => {
             });
         }, 100);
     });
+
+    document.getElementById('export-pdf-btn').addEventListener('click', () => {
+        if(nodes.length === 0) return;
+        showToast("Generating PDF...", "success");
+
+        let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+        nodes.forEach(n => {
+            if(n.x < minX) minX = n.x; if(n.y < minY) minY = n.y;
+            if(n.x > maxX) maxX = n.x; if(n.y > maxY) maxY = n.y;
+        });
+        const w = maxX - minX + 200;
+        const h = maxY - minY + 200;
+
+        const originalScale = scale; const originalX = panX; const originalY = panY;
+        panX = -minX + 100; panY = -minY + 100; scale = 1;
+        updateCanvasTransform();
+
+        setTimeout(() => {
+            if(typeof html2canvas === 'undefined' || typeof window.jspdf === 'undefined') {
+                showToast("PDF libraries not loaded", "error");
+                return;
+            }
+            html2canvas(document.getElementById('canvas'), {
+                width: w, height: h,
+                backgroundColor: document.documentElement.classList.contains('dark') ? '#111827' : '#f9fafb'
+            }).then(canvasEl => {
+                const imgData = canvasEl.toDataURL('image/png');
+                const pdf = new window.jspdf.jsPDF({
+                    orientation: w > h ? 'l' : 'p',
+                    unit: 'px',
+                    format: [w, h]
+                });
+                pdf.addImage(imgData, 'PNG', 0, 0, w, h);
+                pdf.save((mapTitleInput.value || 'map') + '.pdf');
+
+                panX = originalX; panY = originalY; scale = originalScale;
+                updateCanvasTransform();
+            }).catch(err => {
+                showToast("Error generating PDF", "error");
+                panX = originalX; panY = originalY; scale = originalScale;
+                updateCanvasTransform();
+            });
+        }, 100);
+    });
+
+    // --- Search ---
+    const searchInput = document.getElementById('map-search');
+    if(searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            nodes.forEach(n => {
+                const el = document.getElementById(n.id);
+                if(!el) return;
+                if(term && n.text.toLowerCase().includes(term)) {
+                    el.style.boxShadow = '0 0 0 4px rgba(250, 204, 21, 0.8)'; // yellow ring
+                } else {
+                    el.style.boxShadow = ''; // fallback to default/selected
+                }
+            });
+        });
+    }
+
+    // --- Fullscreen ---
+    const fsBtn = document.getElementById('fullscreen-btn');
+    if(fsBtn) {
+        fsBtn.addEventListener('click', () => {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    showToast(`Error attempting to enable fullscreen: ${err.message}`, "error");
+                });
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+            }
+        });
+    }
 
     document.getElementById('export-json-btn').addEventListener('click', () => {
         const dataStr = JSON.stringify({nodes, edges}, null, 2);

@@ -12,10 +12,11 @@
     </script>
     <!-- Parse SDK -->
     <script type="text/javascript" src="https://npmcdn.com/parse/dist/parse.min.js"></script>
-    <!-- Toastify & html2canvas -->
+    <!-- Toastify & html2canvas & jspdf -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body, html {
             margin: 0;
@@ -75,12 +76,35 @@
             border-color: #60a5fa; /* blue-400 */
             color: #f3f4f6; /* gray-100 */
         }
+        .node.selected {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5); /* blue-500 ring */
+            border-color: #2563eb;
+        }
+        .dark .node.selected {
+            box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.5);
+            border-color: #3b82f6;
+        }
+        /* Shapes */
+        .node.shape-round { border-radius: 9999px; padding: 10px 20px; }
+        .node.shape-ellipse { border-radius: 50%; padding: 20px 30px; }
+
         .node:active {
             cursor: grabbing;
         }
         .node-content {
             outline: none;
             min-height: 20px;
+            white-space: pre-wrap; /* For line breaks */
+        }
+        .node-icons {
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 4px;
+            font-size: 10px;
+            color: #6b7280;
         }
         .node-add-btn {
             position: absolute;
@@ -235,18 +259,34 @@
 
         <div class="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-1"></div>
 
-        <button id="export-png-btn" class="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors" title="Export as Image">PNG</button>
-        <button id="export-json-btn" class="px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors" title="Export Data">Exp JSON</button>
-        <label for="import-json" class="px-2 py-1 bg-orange-600 text-white rounded hover:bg-orange-700 transition-colors cursor-pointer" title="Import Data">Imp JSON</label>
+        <button id="auto-layout-btn" class="p-1.5 bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 rounded hover:bg-indigo-200 dark:hover:bg-indigo-800 transition-colors" title="Auto Layout">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+        </button>
+
+        <div class="h-6 w-px bg-gray-300 dark:bg-gray-600 mx-1"></div>
+
+        <button id="export-png-btn" class="px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors" title="Export PNG">PNG</button>
+        <button id="export-pdf-btn" class="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition-colors" title="Export PDF">PDF</button>
+        <button id="export-json-btn" class="px-2 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors" title="Export JSON">Exp JSON</button>
+        <label for="import-json" class="px-2 py-1 bg-orange-600 text-white rounded hover:bg-orange-700 transition-colors cursor-pointer" title="Import JSON">Imp JSON</label>
         <input type="file" id="import-json" accept=".json" class="hidden">
 
         <div id="save-status" class="text-xs text-gray-500 dark:text-gray-400 ml-2"></div>
 
-        <div class="flex-grow"></div>
+        <div class="flex-grow flex justify-center">
+            <div class="relative w-48 hidden md:block">
+                <input type="text" id="map-search" placeholder="Search in map..." class="w-full pl-8 pr-2 py-1 border rounded bg-white dark:bg-gray-800 dark:border-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500 text-xs">
+                <svg class="w-3 h-3 absolute left-2.5 top-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+        </div>
+
+        <button id="fullscreen-btn" class="p-1.5 rounded-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none transition-colors" title="Toggle Fullscreen">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+        </button>
 
         <button id="theme-toggle" class="p-1.5 rounded-md bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none transition-colors">
-            <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
-            <svg id="theme-toggle-light-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 1.32a1 1 0 011.415 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM16 10a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-1.32 4.22a1 1 0 010 1.415l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-4.22-1.32a1 1 0 01-1.415 0l-.707-.707a1 1 0 011.414-1.414l.707.707a1 1 0 010 1.414zM4 10a1 1 0 01-1-1V8a1 1 0 112 0v1a1 1 0 01-1 1zm1.32-4.22a1 1 0 010-1.415l.707-.707a1 1 0 011.414 1.414l-.707.707a1 1 0 01-1.414 0zM10 14a4 4 0 100-8 4 4 0 000 8z"></path></svg>
+            <svg id="theme-toggle-dark-icon" class="hidden w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
+            <svg id="theme-toggle-light-icon" class="hidden w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4.22 1.32a1 1 0 011.415 0l.707.707a1 1 0 01-1.414 1.414l-.707-.707a1 1 0 010-1.414zM16 10a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-1.32 4.22a1 1 0 010 1.415l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 0zM10 16a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm-4.22-1.32a1 1 0 01-1.415 0l-.707-.707a1 1 0 011.414-1.414l.707.707a1 1 0 010 1.414zM4 10a1 1 0 01-1-1V8a1 1 0 112 0v1a1 1 0 01-1 1zm1.32-4.22a1 1 0 010-1.415l.707-.707a1 1 0 011.414 1.414l-.707.707a1 1 0 01-1.414 0zM10 14a4 4 0 100-8 4 4 0 000 8z"></path></svg>
         </button>
     </div>
 
@@ -270,6 +310,63 @@
         <button id="zoom-in" class="zoom-btn" title="Zoom In">+</button>
         <button id="zoom-reset" class="zoom-btn" title="Center Map">⌖</button>
         <button id="zoom-out" class="zoom-btn" title="Zoom Out">-</button>
+    </div>
+
+    <div id="minimap" class="hidden sm:block absolute bottom-20 right-20 w-48 h-32 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded shadow-lg overflow-hidden z-10 pointer-events-none opacity-80">
+        <div id="minimap-content" class="w-full h-full relative origin-top-left"></div>
+        <div id="minimap-viewport" class="absolute border-2 border-blue-500 bg-blue-100 bg-opacity-20 pointer-events-none"></div>
+    </div>
+
+    <div id="properties-panel" class="absolute top-20 right-0 w-64 bg-white dark:bg-gray-800 border-l border-b border-gray-200 dark:border-gray-700 shadow-xl transform translate-x-full transition-transform duration-300 z-20 flex flex-col h-auto max-h-[calc(100vh-100px)] rounded-bl-lg">
+        <div class="p-3 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-900 rounded-bl-lg">
+            <h3 class="font-semibold text-gray-700 dark:text-gray-300 text-sm">Properties</h3>
+            <button id="close-properties" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div class="p-4 overflow-y-auto flex-grow space-y-4 text-sm">
+            <!-- Node Shape -->
+            <div>
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Shape</label>
+                <div class="flex border rounded dark:border-gray-600 overflow-hidden">
+                    <button class="prop-btn flex-1 py-1 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 border-r dark:border-gray-600" data-prop="shape" data-val="rect" title="Rectangle">R</button>
+                    <button class="prop-btn flex-1 py-1 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 border-r dark:border-gray-600" data-prop="shape" data-val="round" title="Rounded">Ro</button>
+                    <button class="prop-btn flex-1 py-1 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600" data-prop="shape" data-val="ellipse" title="Ellipse">E</button>
+                </div>
+            </div>
+            <!-- Text Format -->
+            <div>
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Text Style</label>
+                <div class="flex border rounded dark:border-gray-600 overflow-hidden">
+                    <button class="prop-btn flex-1 py-1 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 border-r dark:border-gray-600 font-bold" data-prop="bold" title="Bold">B</button>
+                    <button class="prop-btn flex-1 py-1 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 border-r dark:border-gray-600 italic" data-prop="italic" title="Italic">I</button>
+                    <button class="prop-btn flex-1 py-1 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 underline" data-prop="underline" title="Underline">U</button>
+                </div>
+            </div>
+            <!-- Line Style -->
+            <div>
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Line Style (to parent)</label>
+                <div class="flex border rounded dark:border-gray-600 overflow-hidden mb-2">
+                    <button class="prop-btn flex-1 py-1 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 border-r dark:border-gray-600" data-prop="lineType" data-val="solid" title="Solid">—</button>
+                    <button class="prop-btn flex-1 py-1 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 border-r dark:border-gray-600" data-prop="lineType" data-val="dashed" title="Dashed">---</button>
+                    <button class="prop-btn flex-1 py-1 bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600" data-prop="lineType" data-val="dotted" title="Dotted">...</button>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs text-gray-500">Weight:</span>
+                    <input type="range" id="line-weight" min="1" max="5" value="2" class="w-full">
+                </div>
+            </div>
+            <!-- Link -->
+            <div>
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Link URL</label>
+                <input type="url" id="node-link" placeholder="https://..." class="w-full px-2 py-1 border rounded bg-white dark:bg-gray-900 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+            </div>
+            <!-- Notes -->
+            <div>
+                <label class="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Notes</label>
+                <textarea id="node-notes" rows="4" placeholder="Additional details..." class="w-full px-2 py-1 border rounded bg-white dark:bg-gray-900 dark:border-gray-600 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 resize-none"></textarea>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->
